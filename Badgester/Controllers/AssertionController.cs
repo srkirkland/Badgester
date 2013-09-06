@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 
@@ -12,6 +14,10 @@ namespace Badgester.Controllers
     public class AssertionController : Controller
     {
         private const string BadgeImagePath = "~/Content/badge.png";
+
+        private static readonly int IssueTime = CurrentUnixTime();
+            //DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+
         /// <summary>
         /// returns information about a specific badge awarded to a specific user
         /// </summary>
@@ -23,8 +29,7 @@ namespace Badgester.Controllers
                 {
                     type = "email",
                     hashed = true,
-                    salt = "deadsea",
-                    identity = "sha256$c7ea4bf7bb3c4f9b1dd1126f1867e0182ceb6c27fea521a2836eb675d5d32640" //srkirkland@ucdavis.edu
+                    identity = "sha256$" + HashString("srkirkland@ucdavis.edu"),
                 };
 
             var verify = new {type = "hosted", url = AbsoluteUrl("UserBadge", id: id)};
@@ -35,7 +40,7 @@ namespace Badgester.Controllers
                     recipient,
                     image = AbsoluteContentUrl(BadgeImagePath),
                     evidence = "http://asi.ucdavis.edu",
-                    issuedOn = 1359217910, //TODO: use real time format
+                    issuedOn = IssueTime,
                     badge = AbsoluteUrl("Badge", id: id),
                     verify
                 };
@@ -89,6 +94,22 @@ namespace Badgester.Controllers
                 };
 
             return Json(obj, JsonRequestBehavior.AllowGet);
+        }
+
+        private static int CurrentUnixTime()
+        {
+            var origin = new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime();
+            TimeSpan diff = DateTime.Now - origin;
+
+            return (int)Math.Floor(diff.TotalSeconds);
+        }
+
+        private string HashString(string original)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(original);
+            var hashstring = new SHA256Managed();
+            var hash = hashstring.ComputeHash(bytes);
+            return hash.Aggregate(string.Empty, (current, x) => current + String.Format("{0:x2}", x));
         }
 
         private string AbsoluteContentUrl(string relativePath)
