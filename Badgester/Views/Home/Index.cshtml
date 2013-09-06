@@ -1,0 +1,38 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "Badgester";
+}
+
+<h2>Badgester</h2>
+
+<form class="obi_issuer">
+    <legend>Fake badge issuer</legend>
+@*    <label>AssertionURL</label><input type="text" id="assertionurl" name="assertionurl" value="http://badg.us/en-US/badges/badge/UC-sample/awards/4266.json"/>*@
+    <label>AssertionURL</label><input type="text" id="assertionurl" name="assertionurl" value="@Url.Action("Verify", "Home", new { id = 123 })"/>
+    <button class="issue">Issue Badge</button>
+</form>
+
+
+@section scripts
+{
+    <script src="http://beta.openbadges.org/issuer.js"></script>   
+    
+    <script>
+        $("form.obi_issuer button.issue").click(function () {
+            // Grab the hosted assertion URL from the header link.
+            var assertion_url = $('#assertionurl');
+            // Fire up the backpack lightbox.
+            OpenBadges.issue([assertion_url], function (errors, successes) {
+                if (errors.length) {
+                    // TODO: Do something better here.
+                    window.alert("Failed to add award to your backpack.");
+                }
+                if (successes.length) {
+                    // TODO: Do something... at all?
+                }
+            });
+            return false;
+        });
+    </script>
+}
