@@ -8,8 +8,7 @@
 
 <form class="obi_issuer">
     <legend>Fake badge issuer</legend>
-    @*<label>AssertionURL</label><input type="text" id="assertionurl" name="assertionurl" value="http://badg.us/en-US/badges/badge/UC-sample/awards/4266.json"/>*@
-    <label>AssertionURL</label><input type="text" id="assertionurl" name="assertionurl" value="@Url.Action("Verify", "Home", new { id = 123 })"/>
+    <label>AssertionURL</label><input type="text" id="assertionurl" name="assertionurl" value="http://badgester.azurewebsites.net/assertion/userbadge/123"/>
     <button class="issue">Issue Badge</button>
 </form>
 
