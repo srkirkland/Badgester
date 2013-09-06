@@ -11,6 +11,7 @@ namespace Badgester.Controllers
     /// </summary>
     public class AssertionController : Controller
     {
+        private const string BadgeImagePath = "~/Content/badge.png";
         /// <summary>
         /// returns information about a specific badge awarded to a specific user
         /// </summary>
@@ -23,20 +24,19 @@ namespace Badgester.Controllers
                     type = "email",
                     hashed = true,
                     salt = "deadsea",
-                    identity = "sha256$c7ea4bf7bb3c4f9b1dd1126f1867e0182ceb6c27fea521a2836eb675d5d32640"
-                    //srkirkland@ucdavis.edu
+                    identity = "sha256$c7ea4bf7bb3c4f9b1dd1126f1867e0182ceb6c27fea521a2836eb675d5d32640" //srkirkland@ucdavis.edu
                 };
 
-            var verify = new {type = "hosted", url = AbsoluteUrl("UserBadge", id)};
+            var verify = new {type = "hosted", url = AbsoluteUrl("UserBadge", id: id)};
 
             var obj = new
                 {
                     uid = id,
                     recipient,
-                    image = "https://example.org/beths-robot-badge.png",
-                    evidence = "https://example.org/beths-robot-work.html",
-                    issuedOn = 1359217910,
-                    badge = AbsoluteUrl("Badge", id),
+                    image = AbsoluteContentUrl(BadgeImagePath),
+                    evidence = "http://asi.ucdavis.edu",
+                    issuedOn = 1359217910, //TODO: use real time format
+                    badge = AbsoluteUrl("Badge", id: id),
                     verify
                 };
 
@@ -63,12 +63,12 @@ namespace Badgester.Controllers
 
             var obj = new
                 {
-                    name = "Awesome Robotics Badge",
+                    name = "Awesome Fake Badgester Badge",
                     description = "For doing awesome things with robots that people think is pretty great.",
-                    image = "https://example.org/robotics-badge.png",
-                    criteria = AbsoluteUrl("Badge", id),
-                    tags = new[] {"robots", "awesome"},
-                    issuer = AbsoluteUrl("Organization", null),
+                    image = AbsoluteContentUrl(BadgeImagePath),
+                    criteria = AbsoluteUrl("Badge", id: id),
+                    tags = new[] {"ucdbadges", "awesome"},
+                    issuer = AbsoluteUrl("Organization"),
                 };
 
             return Json(obj, JsonRequestBehavior.AllowGet);
@@ -82,19 +82,23 @@ namespace Badgester.Controllers
         {
             var obj = new
                 {
-                    name = "An Example Badge Issuer",
-                    image = "https://example.org/logo.png",
-                    url = "https://example.org",
-                    email = "steved@example.org",
-                    revocationList = "https://example.org/revoked.json"
+                    name = "UC Davis FAKE Issuer",
+                    image = "http://asi.ucdavis.edu/img/logo-anr.jpg",
+                    url = "http://asi.ucdavis.edu/front-page",
+                    email = "fake@ucdavis.edu",
                 };
 
             return Json(obj, JsonRequestBehavior.AllowGet);
         }
 
-        private string AbsoluteUrl(string action, string id)
+        private string AbsoluteContentUrl(string relativePath)
         {
-            return Url.Action(action, null, new {id}, ControllerContext.HttpContext.Request.Url.Scheme);
+            return AbsoluteUrl("Index", "Home") + Url.Content(relativePath);
+        }
+
+        private string AbsoluteUrl(string action, string controller = null, string id = null)
+        {
+            return Url.Action(action, controller, new {id}, ControllerContext.HttpContext.Request.Url.Scheme);
         }
     }
 }
