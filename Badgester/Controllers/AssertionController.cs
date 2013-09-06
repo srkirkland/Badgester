@@ -14,34 +14,34 @@ namespace Badgester.Controllers
     public class AssertionController : Controller
     {
         private const string BadgeImagePath = "~/Content/badge.png";
-
         private static readonly int IssueTime = CurrentUnixTime();
-            //DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
-
+        
         /// <summary>
         /// returns information about a specific badge awarded to a specific user
         /// </summary>
-        /// <param name="id">locally unique ID of badge</param>
+        /// <param name="email">email of person who gets the badge</param>
         /// <returns></returns>
-        public ActionResult UserBadge(string id)
+        public ActionResult UserBadge(string email)
         {
+            const string uid = "12345";
+
             var recipient = new
                 {
                     type = "email",
                     hashed = true,
-                    identity = "sha256$" + HashString("srkirkland@ucdavis.edu"),
+                    identity = "sha256$" + HashString(email),
                 };
 
-            var verify = new {type = "hosted", url = AbsoluteUrl("UserBadge", id: id)};
+            var verify = new {type = "hosted", url = AbsoluteUrl("userbadge", email: email)};
 
             var obj = new
                 {
-                    uid = id,
+                    uid,
                     recipient,
                     image = AbsoluteContentUrl(BadgeImagePath),
                     evidence = "http://asi.ucdavis.edu",
                     issuedOn = IssueTime,
-                    badge = AbsoluteUrl("Badge", id: id),
+                    badge = AbsoluteUrl("Badge", id: uid),
                     verify
                 };
 
@@ -117,9 +117,9 @@ namespace Badgester.Controllers
             return AbsoluteUrl("Index", "Home") + Url.Content(relativePath);
         }
 
-        private string AbsoluteUrl(string action, string controller = null, string id = null)
+        private string AbsoluteUrl(string action, string controller = null, string id = null, string email = null)
         {
-            return Url.Action(action, controller, new {id}, ControllerContext.HttpContext.Request.Url.Scheme);
+            return Url.Action(action, controller, new {id, email}, ControllerContext.HttpContext.Request.Url.Scheme);
         }
     }
 }

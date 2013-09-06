@@ -8,164 +8,25 @@
 
 <form class="obi_issuer">
     <legend>Fake badge issuer</legend>
-    <label>AssertionURL</label><input type="text" id="assertionurl" name="assertionurl" value="http://badgester.azurewebsites.net/assertion/userbadge/123"/>
+    <label>Your Email Address:</label>
+    <input type="text" id="email" name="email" placeholder="you@ucdavis.edu" required="required" />
+    <br/>
     <button class="issue">Issue Badge</button>
 </form>
 
 
 @section scripts
 {
-
-    <script type='text/javascript' src='http://openbadges.org/wp-content/themes/openbadges2/media/js/sha256.js'></script>
-    
     <script src="http://beta.openbadges.org/issuer.js"></script>   
-    
-    <script>
-        var QuickBadge = (function() {
-            var BADGE_REQUIRED_FIELDS = [
-                "version",
-                "name",
-                "image",
-                "description",
-                "criteria"
-            ];
-
-            var ISSUER_REQUIRED_FIELDS = [
-                "origin",
-                "name"
-            ];
-
-            // From http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
-            function validateEmail(email) {
-                var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                return re.test(email);
-            }
-
-            return {
-                validateEmail: validateEmail,
-                publish: function (options) {
-                    var assertion = options.assertion;
-                    var publish = jQuery.Deferred();
-                    if (!assertion || !assertion.badge || !assertion.badge.issuer)
-                        throw new Error("invalid assertion");
-                    BADGE_REQUIRED_FIELDS.forEach(function(field) {
-                        if (!assertion.badge[field])
-                            throw new Error("Missing field: badge." + field);
-                    });
-                    ISSUER_REQUIRED_FIELDS.forEach(function(field) {
-                        if (!assertion.badge.issuer[field])
-                            throw new Error("Missing field: badge.issuer." + field);
-                    });
-                    jQuery.ajax({
-                        type: 'POST',
-                        url: options.service,
-                        data: {
-                            'json': JSON.stringify(assertion),
-                            'original-url': window.location.href,
-                        },
-                        crossDomain: true,
-                        dataType: 'json',
-                        success: function(response) {
-                            publish.resolve(response['published-url']);
-                        },
-                        error: function() {
-                            publish.reject.apply(publish, arguments);
-                        }
-                    });
-                    return publish;
-                },
-                issue: function(url) {
-                    var issue = jQuery.Deferred();
-                    OpenBadges.issue([url], function(errors, successes) {
-                        issue.resolve(errors, successes);
-                    });
-                    return issue;
-                }
-            };
-        })();
-    </script>
-
-    <script>
-        /*
-        $("form.obi_issuer button.issue").click(function () {
-            // Grab the hosted assertion URL from the header link.
-            var assertion_url = $('#assertionurl');
-            // Fire up the backpack lightbox.
-            OpenBadges.issue([assertion_url], function (errors, successes) {
-                if (errors.length) {
-                    // TODO: Do something better here.
-                    window.alert("Failed to add award to your backpack.");
-                }
-                if (successes.length) {
-                    // TODO: Do something... at all?
-                }
-            });
-            return false;
-        });
-        */
-    </script>
     
     <script>
         $("form").submit(function (e) {
             e.preventDefault();
-            var assertion_url = $("#assertionurl").val();
-            QuickBadge.issue(assertion_url).done(function(errors, successes) {
-                if (successes.length) {
-                    $("#get-badge").hide();
-                    $("#after-badge").show();
-                } else {
-                    $("#get-badge form").show();
-                    $("#throbber").hide();
-                }
-                console.log("errors", errors, "successes", successes);
+            var assertionUrl = "http://badgester.azurewebsites.net/assertion/userbadge?email=" + encodeURIComponent($("#email").val());
+            OpenBadges.issue(assertionUrl, function(errors, successes) {
+                console.log(errors);
+                console.log(successes);
             });
-            /*
-            var email = "srkirkland@ucdavis.edu";
-            var baseURI = $('<a href="./"></a>')[0].href;
-            var hashedEmail = 'sha256$' + sha256_digest(email);
-            var publish = QuickBadge.publish({
-                service: "http://hackpub.hackasaurus.org/publish",
-                assertion: {
-                    "recipient": hashedEmail,
-                    "badge": {
-                        "version": "0.5.0",
-                        "name": "Badges 101",
-                        "image": 'http://badg.us/media/uploads/badge/6/a/6aed5171e1da4758ed8b098d20680673_image_1378423762_0254.png', //$("#badges101")[0].src,
-                        "description": "You really get badges!",
-                        "criteria": "http://badges-101.openbadges.org/",
-                        "issuer": {
-                            "origin": "http://www.openbadges.org",
-                            "name": "Open Badges",
-                            "org": "Mozilla Foundation",
-                            "contact": "hai2u@openbadges.org"
-                        }
-                    }
-                }
-            });
-
-
-            publish.fail(function (a, b, c) {
-                debugger;
-                alert("Sorry, an error occurred. Please try again later.");
-                $("#get-badge form").show();
-                $("#throbber").hide();
-            });
-            publish.done(function(url) {
-                alert("done");
-                $("#throbber").fadeOut();
-                QuickBadge.issue(url).done(function(errors, successes) {
-                    if (successes.length) {
-                        $("#get-badge").hide();
-                        $("#after-badge").show();
-                    } else {
-                        $("#get-badge form").show();
-                        $("#throbber").hide();
-                    }
-                    console.log("errors", errors, "successes", successes);
-                });
-            });
-            */
         });
-           
     </script>
 }
