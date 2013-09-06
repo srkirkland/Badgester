@@ -68,11 +68,11 @@ namespace Badgester.Controllers
 
             var obj = new
                 {
-                    name = "Awesome Fake Badgester Badge",
-                    description = "For doing awesome things with robots that people think is pretty great.",
+                    name = "Awesome Fake Climbing Badgester",
+                    description = "Crushing it at the crags",
                     image = AbsoluteContentUrl(BadgeImagePath),
                     criteria = AbsoluteUrl("Badge", id: id),
-                    tags = new[] {"ucdbadges", "awesome"},
+                    tags = new[] {"ucdbadges", "awesome", "climbing"},
                     issuer = AbsoluteUrl("Organization"),
                 };
 
